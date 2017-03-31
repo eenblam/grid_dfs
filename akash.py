@@ -3,6 +3,8 @@ from collections import namedtuple
 from itertools import chain
 from random import randint, sample
 
+from PIL import Image, ImageSequence
+
 Position = namedtuple('Position', ['i', 'j', 'val'])
 
 class GameInstance(object):
@@ -172,7 +174,8 @@ class GameInstance(object):
         for state in self.simulate(steps):
             print(state)
             if pause:
-                _ = raw_input()
+                #_ = raw_input()
+                _ = input()
 
     def step(self):
         nb = self.neighbors()
@@ -203,7 +206,37 @@ class GameInstance(object):
             pos_str = 'Position:\tNone\n'
         else:
             pos_str = 'Position:\t({}, {})\n'.format(self.position.i, self.position.j)
+
         return pos_str + ''.join(lines())
+
+    def gif(self, fname, steps=None):
+        sim = self.simulate(steps)
+        frames = [state.__gif_frame__() for state in sim]
+        first, rest = frames[0], frames[1:]
+        if fname[-4:] != '.gif':
+            raise ValueError('Filename is not a .gif')
+
+        with open(fname, 'w') as f:
+            first.save(f, save_all=True, append_images=rest)
+
+
+    def __gif_frame__(self):
+        im = Image.new("RGB", (self.m, self.n), None)
+        x, y, _ = self.position
+        pos = x * self.n + y
+
+        flat_M_RGB = list(colorify(x) for x in chain.from_iterable(self.M))
+        # Paint current position red
+        flat_M_RGB[pos] = (256,0,0)
+
+        im.putdata(flat_M_RGB)
+        size = (self.m * 100, self.n * 100)
+        im.resize(size)
+        im = im.transform(size, Image.EXTENT, (0,0, size[0], size[1]))
+
+        return im
+
+
 
     def simulate(self, steps=None):
         if self.complete():
@@ -257,6 +290,19 @@ class Neighborhood(object):
         """
         return len(self.free())
 
+def colorify(x):
+    if x is None:
+        # Unvisited, unwalled - Black
+        return (0,0,0)
+    if x == 1:
+        # Walled - White
+        return (256,256,256)
+    if x == 0:
+        # Visited - Grey
+        return (128,128,128)
+    # Error - Blue
+    return (0,0,256)
+
 if __name__ == '__main__':
     unit = GameInstance(1, 1, [[1]])
     assert unit.complete()
@@ -274,5 +320,7 @@ if __name__ == '__main__':
 
     #game = GameInstance(m, n, M)
     game = GameInstance(10, 10)
+    #game.random_start()
+    #game.show_simulation(pause=True)
     game.random_start()
-    game.show_simulation(pause=True)
+    game.gif('sim.gif')
