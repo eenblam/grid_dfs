@@ -174,8 +174,7 @@ class GameInstance(object):
         for state in self.simulate(steps):
             print(state)
             if pause:
-                #_ = raw_input()
-                _ = input()
+                _ = raw_input()
 
     def step(self):
         nb = self.neighbors()
@@ -320,7 +319,6 @@ if __name__ == '__main__':
 
     #game = GameInstance(m, n, M)
     game = GameInstance(10, 10)
-    #game.random_start()
-    #game.show_simulation(pause=True)
     game.random_start()
-    game.gif('sim.gif')
+    game.show_simulation(pause=True)
+    #game.gif('sim.gif')
