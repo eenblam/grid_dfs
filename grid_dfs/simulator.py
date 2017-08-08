@@ -5,7 +5,8 @@ from random import randint, sample
 
 from PIL import Image, ImageSequence
 
-Position = namedtuple('Position', ['i', 'j', 'val'])
+from neighborhood import Neighborhood
+from position import Position
 
 class GameInstance(object):
     def __init__(self, m, n, M=None):
@@ -255,40 +256,6 @@ class GameInstance(object):
 
         yield self
 
-class Neighborhood(object):
-    def __init__(self):
-        self.top = None
-        self.right = None
-        self.bottom = None
-        self.left = None
-
-    def free(self):
-        """ Returns a list of all free neighbors.
-        """
-        return [p for p in self.items() if p.val is None]
-
-    def items(self):
-        """ Returns a list of all existing neighbors.
-
-        A None value in the list denotes an off-matrix position.
-        """
-        l = [self.top, self.right, self.bottom, self.left]
-        return [x for x in l if x is not None]
-
-    def next_free(self):
-        """ Returns Position of next free neighbor wrt clockwise heuristic
-        """
-        free = self.free()
-        return free[0] if free else None
-
-    def __len__(self):
-        """ Returns number of unmarked neighbors
-        
-        Note that defining __len__ allows truthiness checks
-        in which a length of 0 implies the neighborhood is falsey
-        """
-        return len(self.free())
-
 def colorify(x):
     if x is None:
         # Unvisited, unwalled - Black
@@ -302,23 +269,3 @@ def colorify(x):
     # Error - Blue
     return (0,0,256)
 
-if __name__ == '__main__':
-    unit = GameInstance(1, 1, [[1]])
-    assert unit.complete()
-    unit.show_simulation(2)
-    two_by_two = GameInstance(2, 2, [[1,1],[1,1]])
-    assert two_by_two.complete()
-    two_by_two.show_simulation(2)
-
-    m = 4
-    n = 6
-    M = [[None, None, None, 1, None, 1],
-        [None, None, 1, None, 1, 1],
-        [None, None, None, 1, None, None],
-        [None, None, None, None, None, None]]
-
-    #game = GameInstance(m, n, M)
-    game = GameInstance(10, 10)
-    game.random_start()
-    game.show_simulation(pause=True)
-    #game.gif('sim.gif')
