@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from collections import namedtuple
 from itertools import chain
 from random import randint, sample
 
