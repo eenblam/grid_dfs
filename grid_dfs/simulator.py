@@ -6,6 +6,7 @@ from PIL import Image, ImageSequence
 
 from neighborhood import Neighborhood
 from position import Position
+from colors import colorize
 
 class GameInstance(object):
     def __init__(self, m, n, M=None):
@@ -197,7 +198,8 @@ class GameInstance(object):
         def lines():
             for row in self.M:
                 row = ('x' if x is None else str(x) for x in row)
-                line = ' '.join(row) + '\n'
+                color_row = (colorize(x) for x in row)
+                line = ' '.join(color_row) + '\n'
                 yield line
 
         i,j,_ = self.position if self.position is not None else None, None, None
